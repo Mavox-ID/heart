@@ -1,0 +1,306 @@
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startHeart = document.getElementById('startHeart');
+        const message = document.getElementById('message');
+        const finalMessage = document.getElementById('finalMessage');
+        const instructionText = document.getElementById('instructionText');
+        const arrow = document.getElementById('arrow');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let stage = 0;
+        let heartSize = 2;
+        let growthWaves = 0;
+        const maxHeartSize = 15;
+
+        class Particle {
+            constructor(x, y, targetX, targetY, color = '#ff1744', depth = 0, brightness = 1) {
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.color = color;
+                this.size = Math.random() * 3 + 2;
+                this.vx = 0;
+                this.vy = 0;
+                this.arrived = false;
+                this.alpha = 1;
+                this.depth = depth || 0;
+                this.brightness = brightness || 1;
+            }
+
+            update() {
+                if (!this.arrived) {
+                    const dx = this.targetX - this.x;
+                    const dy = this.targetY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 2) {
+                        this.arrived = true;
+                        this.x = this.targetX;
+                        this.y = this.targetY;
+                    } else {
+                        this.vx = dx * 0.05;
+                        this.vy = dy * 0.05;
+                        this.x += this.vx;
+                        this.y += this.vy;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+                
+                const scale = 1 + (this.depth * 0.002);
+                const adjustedSize = this.size * scale;
+                
+                const r = parseInt(this.color.slice(1, 3), 16);
+                const g = parseInt(this.color.slice(3, 5), 16);
+                const b = parseInt(this.color.slice(5, 7), 16);
+                const brightnessFactor = 0.6 + (this.brightness * 0.4);
+                
+                ctx.fillStyle = `rgb(${r * brightnessFactor}, ${g * brightnessFactor}, ${b * brightnessFactor})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, adjustedSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createHeartShape(centerX, centerY, size) {
+            const points = [];
+            for (let t = 0; t < Math.PI * 2; t += 0.03) {
+                const x = size * 16 * Math.pow(Math.sin(t), 3);
+                const y = -size * (13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                
+                const depth = Math.sin(t) * size * 2;
+                const brightness = Math.abs(Math.sin(t));
+                
+                points.push({ 
+                    x: centerX + x, 
+                    y: centerY + y,
+                    depth: depth,
+                    brightness: brightness
+                });
+            }
+            return points;
+        }
+
+        function createPopperShape(centerX, centerY) {
+            const points = [];
+            for (let y = 0; y < 250; y += 2.5) {
+                const width = 35 + (y * 0.25);
+                for (let x = -width; x < width; x += 3) {
+                    const depth = Math.sqrt(width * width - x * x);
+                    points.push({ 
+                        x: centerX + x, 
+                        y: centerY - 100 + y,
+                        depth: depth 
+                    });
+                }
+            }
+            for (let y = -130; y < -100; y += 2.5) {
+                for (let x = -55; x < 55; x += 3) {
+                    const depth = 55 - Math.abs(x);
+                    points.push({ 
+                        x: centerX + x, 
+                        y: centerY + y,
+                        depth: depth 
+                    });
+                }
+            }
+            for (let y = -150; y < -130; y += 3) {
+                for (let x = -15; x < 15; x += 4) {
+                    points.push({ 
+                        x: centerX + x, 
+                        y: centerY + y,
+                        depth: 15 - Math.abs(x)
+                    });
+                }
+            }
+            return points;
+        }
+
+        startHeart.addEventListener('click', () => {
+            startHeart.classList.add('hidden');
+            instructionText.classList.add('hidden');
+            arrow.classList.add('hidden');
+            stage = 1;
+            startAnimation();
+        });
+
+        function startAnimation() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            for (let i = 0; i < 600; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 800 + Math.random() * 200;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                particles.push(new Particle(x, y, x, y));
+            }
+
+            const heartPoints = createHeartShape(centerX, centerY, heartSize);
+            particles.forEach((p, i) => {
+                const point = heartPoints[i % heartPoints.length];
+                p.targetX = point.x;
+                p.targetY = point.y;
+                p.depth = point.depth;
+                p.brightness = point.brightness;
+            });
+
+            animate();
+        }
+
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            const allArrived = particles.every(p => p.arrived);
+
+            if (stage === 1 && allArrived) {
+                stage = 2;
+                growHeart();
+            }
+
+            if (stage === 2 && allArrived && growthWaves >= 5) {
+                stage = 3;
+                setTimeout(() => {
+                    message.textContent = 'З Днем Народження Наталія';
+                    message.style.opacity = '1';
+                    message.style.transition = 'opacity 1s';
+                    
+                    setTimeout(() => {
+                        message.style.opacity = '0';
+                        setTimeout(() => {
+                            stage = 4;
+                            formPopper();
+                        }, 1000);
+                    }, 6000);
+                }, 500);
+            }
+
+            if (stage === 4 && allArrived) {
+                stage = 5;
+                setTimeout(() => {
+                    explodePopper();
+                }, 1000);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function growHeart() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            
+            const addWave = () => {
+                growthWaves++;
+                heartSize += 2.5;
+                
+                const newParticles = 200;
+                for (let i = 0; i < newParticles; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 600 + Math.random() * 300;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    particles.push(new Particle(x, y, x, y));
+                }
+                
+                const heartPoints = createHeartShape(centerX, centerY, Math.min(heartSize, maxHeartSize));
+                particles.forEach((p, i) => {
+                    p.arrived = false;
+                    const point = heartPoints[i % heartPoints.length];
+                    p.targetX = point.x;
+                    p.targetY = point.y;
+                    p.depth = point.depth;
+                    p.brightness = point.brightness;
+                });
+                
+                if (growthWaves < 5) {
+                    setTimeout(addWave, 1200);
+                }
+            };
+            
+            setTimeout(addWave, 800);
+        }
+
+        function formPopper() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const popperPoints = createPopperShape(centerX, centerY);
+
+            const colors = ['#ff6b9d', '#c44569', '#ffa502', '#ff6348', '#a29bfe', '#fd79a8', '#fdcb6e', '#e17055'];
+            
+            particles.forEach((p, i) => {
+                p.arrived = false;
+                const point = popperPoints[i % popperPoints.length];
+                p.targetX = point.x;
+                p.targetY = point.y;
+                p.depth = point.depth || 0;
+                
+                const colorIndex = Math.floor((i / popperPoints.length) * colors.length + (point.depth || 0) * 0.1) % colors.length;
+                const targetColor = colors[colorIndex];
+                const steps = 80;
+                let currentStep = 0;
+                
+                const colorTransition = setInterval(() => {
+                    currentStep++;
+                    const progress = currentStep / steps;
+                    p.color = targetColor;
+                    p.brightness = 0.7 + ((point.depth || 0) / 100) * 0.3;
+                    if (currentStep >= steps) clearInterval(colorTransition);
+                }, 40);
+            });
+        }
+
+        function explodePopper() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 50;
+
+            particles.forEach(p => {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 15 + 5;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed - Math.random() * 10;
+                p.arrived = true;
+            });
+
+            let explosionTime = 0;
+            const explosionInterval = setInterval(() => {
+                explosionTime++;
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3;
+                    p.alpha -= 0.01;
+                });
+
+                if (explosionTime > 120) {
+                    clearInterval(explosionInterval);
+                    stage = 6;
+                    particles = [];
+                    setTimeout(() => {
+                        finalMessage.innerHTML = 'Любимо тебе всією родиною, дякую, що ти з нами';
+                        finalMessage.style.opacity = '1';
+                        finalMessage.style.transition = 'opacity 2s';
+                    }, 1000);
+                }
+            }, 30);
+        }
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
