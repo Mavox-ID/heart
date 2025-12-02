@@ -86,7 +86,7 @@
 
         #message {
             position: absolute;
-            top: 50%;
+            top: 52%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
@@ -108,15 +108,17 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 32px;
+            font-size: 48px;
             text-align: center;
             opacity: 0;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
             pointer-events: none;
             z-index: 5;
-            max-width: 90%;
-            line-height: 1.5;
-            padding: 20px;
+            max-width: 100%;
+            line-height: 1.6;
+            padding: 30px;
+            white-space: nowrap;
+            overflow: visible;
         }
 
         #congratsMessage {
@@ -160,7 +162,10 @@
             }
 
             #finalMessage {
-                font-size: 28px;
+                font-size: 38px;
+                max-width: 100%;
+                white-space: normal;
+                padding: 20px;
             }
 
             #congratsMessage {
@@ -198,7 +203,8 @@
             }
 
             #finalMessage {
-                font-size: 24px;
+                font-size: 26px;
+                white-space: normal;
             }
 
             #congratsMessage {
@@ -390,10 +396,12 @@
             ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            particles.forEach(p => {
-                p.update();
-                p.draw();
-            });
+            if (stage < 6) {
+                particles.forEach(p => {
+                    p.update();
+                    p.draw();
+                });
+            }
 
             const allArrived = particles.every(p => p.arrived);
 
@@ -547,8 +555,8 @@
 
             const isMobile = window.innerWidth < 768;
             const isSmallMobile = window.innerWidth < 480;
-            const fontSize = isSmallMobile ? '110px' : isMobile ? '130px' : '160px';
-            const largeFontSize = isSmallMobile ? '130px' : isMobile ? '150px' : '190px';
+            const fontSize = isSmallMobile ? '95px' : isMobile ? '110px' : '135px';
+            const largeFontSize = isSmallMobile ? '110px' : isMobile ? '130px' : '160px';
 
             Object.assign(digit1.style, {
                 position: 'absolute',
@@ -582,9 +590,9 @@
             document.body.appendChild(digit2);
 
             setTimeout(() => {
-                digit1.style.top = '45%';
+                digit1.style.top = '40%';
                 digit1.style.opacity = '1';
-                digit2.style.top = '55%';
+                digit2.style.top = '60%';
                 digit2.style.opacity = '1';
             }, 50);
 
