@@ -85,14 +85,12 @@
             display: none;
         }
 
-        #message, #finalMessage {
+        .centered-message {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 6vw;
-            max-font-size: 36px;
             text-align: center;
             opacity: 0;
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
@@ -104,11 +102,36 @@
             padding: 20px;
         }
 
+        #message {
+            font-size: 5vw;
+            max-font-size: 30px;
+        }
+
         #finalMessage {
+            font-size: 4.5vw;
+            max-font-size: 28px;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
-            font-size: 5.5vw;
-            max-font-size: 32px;
-            line-height: 1.5;
+            white-space: nowrap;
+        }
+        
+        #ageTransition {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 15vw;
+            max-font-size: 80px;
+            font-weight: 900;
+            color: #ff1744;
+            text-shadow: 0 0 20px rgba(255, 23, 68, 0.9);
+            z-index: 5;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        #ageTransition span {
+            display: inline-block;
+            transition: transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s;
         }
     </style>
 </head>
@@ -121,8 +144,9 @@
     <div id="arrow">↓</div>
 
     <canvas id="canvas"></canvas>
-    <div id="message"></div>
-    <div id="finalMessage"></div>
+    <div id="message" class="centered-message"></div>
+    <div id="ageTransition"></div>
+    <div id="finalMessage" class="centered-message"></div>
     <script>const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const startHeart = document.getElementById('startHeart');
@@ -130,6 +154,7 @@
         const finalMessage = document.getElementById('finalMessage');
         const instructionText = document.getElementById('instructionText');
         const arrow = document.getElementById('arrow');
+        const ageTransition = document.getElementById('ageTransition');
 
         canvas.width = window.innerWidth;
         canvas.height = window.innerHeight;
@@ -304,7 +329,7 @@
             if (stage === 2 && allArrived && growthWaves >= 5) {
                 stage = 3;
                 setTimeout(() => {
-                    message.textContent = 'З Днем Народження Наталія';
+                    message.textContent = 'З Днем Народження, Наталія!';
                     message.style.opacity = '1';
                     message.style.transition = 'opacity 1s';
                     
@@ -312,16 +337,28 @@
                         message.style.opacity = '0';
                         setTimeout(() => {
                             stage = 4;
-                            formPopper();
+                            ageAnimation();
                         }, 1000);
-                    }, 5000);
+                    }, 4000);
                 }, 500);
             }
 
-            if (stage === 4 && allArrived) {
-                stage = 5;
+            if (stage === 4.5) {
+                const popperReady = particles.every(p => p.arrived || particles.length < 500);
+                if (popperReady) {
+                    stage = 5;
+                    setTimeout(() => {
+                        explodePopper();
+                    }, 1000);
+                }
+            }
+
+            if (stage === 7 && particles.length === 0) {
+                stage = 8;
                 setTimeout(() => {
-                    explodePopper();
+                    finalMessage.innerHTML = 'Любимо тебе всією родиною, дякую, що ти з нами';
+                    finalMessage.style.opacity = '1';
+                    finalMessage.style.transition = 'opacity 2s';
                 }, 1000);
             }
 
@@ -363,6 +400,44 @@
             setTimeout(addWave, 800);
         }
 
+        function ageAnimation() {
+            ageTransition.innerHTML = '<span>3</span><span>6</span>';
+            ageTransition.style.opacity = '1';
+            const [digit3, digit6] = ageTransition.children;
+
+            setTimeout(() => {
+                digit3.style.transform = 'translateY(-150px)';
+                digit3.style.opacity = '0';
+
+                digit6.style.transform = 'translateY(-150px)';
+                digit6.style.opacity = '0';
+            }, 1000);
+            
+            setTimeout(() => {
+                ageTransition.innerHTML = '<span>3</span><span>7</span>';
+                const [digit3New, digit7New] = ageTransition.children;
+                
+                digit3New.style.transform = 'translateY(150px)';
+                digit7New.style.transform = 'translateY(150px)';
+                
+                setTimeout(() => {
+                    digit3New.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s';
+                    digit7New.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 0.5s';
+
+                    digit3New.style.transform = 'translateY(0)';
+                    digit7New.style.transform = 'translateY(0)';
+
+                    setTimeout(() => {
+                        ageTransition.innerHTML = 'Вітаю!';
+                        ageTransition.style.fontSize = '12vw';
+                        ageTransition.style.maxWidth = '80%';
+                        stage = 4.5;
+                        formPopper();
+                    }, 1000);
+                }, 50);
+            }, 1500); 
+        }
+
         function formPopper() {
             const centerX = canvas.width / 2;
             const centerY = canvas.height / 2;
@@ -386,6 +461,7 @@
         }
 
         function explodePopper() {
+            ageTransition.style.opacity = '0';
             particles.forEach(p => {
                 const angle = Math.random() * Math.PI * 2;
                 const speed = Math.random() * 12 + 4;
@@ -407,13 +483,8 @@
 
                 if (explosionTime > 150) {
                     clearInterval(explosionInterval);
-                    stage = 6;
+                    stage = 7;
                     particles = [];
-                    setTimeout(() => {
-                        finalMessage.innerHTML = 'Любимо тебе всією родиною, дякую, що ти з нами';
-                        finalMessage.style.opacity = '1';
-                        finalMessage.style.transition = 'opacity 2s';
-                    }, 1000);
                 }
             }, 30);
         }
