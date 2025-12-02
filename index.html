@@ -277,12 +277,19 @@
             return points;
         }
 
-        startHeart.addEventListener('click', () => {
+        function startSequence() {
+            if (stage !== 0) return;
             startHeart.classList.add('hidden');
             instructionText.classList.add('hidden');
             arrow.classList.add('hidden');
             stage = 1;
             startAnimation();
+        }
+
+        startHeart.addEventListener('click', startSequence);
+        startHeart.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startSequence();
         });
 
         function startAnimation() {
@@ -503,13 +510,6 @@
                 });
             }
         });
-
-        if ('ontouchstart' in window) {
-            startHeart.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-                if (stage === 0) startHeart.click();
-            });
-        }
     </script>
 </body>
 </html>
