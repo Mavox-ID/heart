@@ -1,396 +1,607 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>З Днем Народження Наталія!</title>
-<style>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>З Днем Народження Наталія!</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-body {
-    background: #000;
-    overflow: hidden;
-    font-family: 'Georgia', serif;
-}
+        body {
+            background: #000;
+            overflow: hidden;
+            font-family: 'Georgia', serif;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
 
-canvas {
-    display: block;
-}
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
 
-#startHeart {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    width: 110px;
-    height: 110px;
-    cursor: pointer;
-    transition: transform 0.3s ease;
-    z-index: 10;
-}
+        #startHeart {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
 
-#startHeart:hover {
-    transform: translate(-50%, -50%) scale(1.12);
-}
+        #startHeart:hover {
+            transform: translate(-50%, -50%) scale(1.15);
+        }
 
-#startHeart path {
-    fill: #ff1744;
-}
+        #startHeart path {
+            fill: #ff1744;
+        }
 
-#instructionText {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -250px);
-    color: #fff;
-    font-size: 20px;
-    text-align: center;
-    z-index: 11;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
-}
+        #instructionText {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -220px);
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            z-index: 11;
+            font-family: 'Georgia', serif;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            padding: 0 20px;
+        }
 
-#arrow {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -160px);
-    font-size: 50px;
-    color: #fff;
-    z-index: 11;
-    animation: bounce 1.5s ease-in-out infinite;
-}
+        #arrow {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -150px);
+            font-size: 50px;
+            color: #fff;
+            z-index: 11;
+            animation: bounce 1.5s ease-in-out infinite;
+        }
 
-@keyframes bounce {
-    0%,100% { transform: translate(-50%, -160px); }
-    50% { transform: translate(-50%, -140px); }
-}
-
-.hidden {
-    display: none;
-}
-
-#message {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 26px;
-    text-align: center;
-    opacity: 0;
-    text-shadow: 0 0 25px rgba(255,255,255,0.8);
-    pointer-events: none;
-    z-index: 5;
-    max-width: 85%;
-    font-weight: bold;
-    line-height: 1.3;
-}
-
-#finalMessage {
-    position: absolute;
-    top: 52%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    color: #fff;
-    font-size: 24px;
-    text-align: center;
-    opacity: 0;
-    text-shadow: 0 0 20px rgba(255,255,255,0.6);
-    pointer-events: none;
-    z-index: 5;
-    max-width: 80%;
-    line-height: 1.35;
-}
-
-#last37 {
-    position: absolute;
-    top: 60%;
-    left: 50%;
-    transform: translate(-50%, 100px);
-    opacity: 0;
-    font-size: 32px;
-    color: #fff;
-    text-align: center;
-    font-weight: bold;
-    text-shadow: 0 0 25px rgba(255,255,255,0.8);
-    z-index: 7;
-    transition: all 1.2s ease;
-}
-</style>
-</head>
-<body>
-
-<svg id="startHeart" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <path d="M50,90 C50,90 10,60 10,35 C10,20 20,10 30,10 C40,10 45,15 50,25 C55,15 60,10 70,10 C80,10 90,20 90,35 C90,60 50,90 50,90 Z"/>
-</svg>
-
-<div id="instructionText">Натисни на нього</div>
-<div id="arrow">↓</div>
-
-<canvas id="canvas"></canvas>
-<div id="message"></div>
-<div id="finalMessage"></div>
-<div id="last37">Вітаю!</div>
-
-<script>
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-const startHeart = document.getElementById('startHeart');
-const message = document.getElementById('message');
-const finalMessage = document.getElementById('finalMessage');
-const last37 = document.getElementById('last37');
-const instructionText = document.getElementById('instructionText');
-const arrow = document.getElementById('arrow');
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let particles = [];
-let stage = 0;
-let heartSize = 2;
-let growthWaves = 0;
-const maxHeartSize = 15;
-
-class Particle {
-    constructor(x,y,targetX,targetY,color='#ff1744',depth=0,brightness=1) {
-        this.x=x; this.y=y;
-        this.targetX=targetX; this.targetY=targetY;
-        this.color=color;
-        this.size=Math.random()*3+2;
-        this.vx=0; this.vy=0;
-        this.arrived=false;
-        this.alpha=1;
-        this.depth=depth;
-        this.brightness=brightness;
-    }
-
-    update() {
-        if(!this.arrived) {
-            const dx=this.targetX-this.x;
-            const dy=this.targetY-this.y;
-            const dist=Math.sqrt(dx*dx+dy*dy);
-            if(dist<2) {
-                this.arrived=true;
-                this.x=this.targetX;
-                this.y=this.targetY;
-            } else {
-                this.vx=dx*0.05;
-                this.vy=dy*0.05;
-                this.x+=this.vx;
-                this.y+=this.vy;
+        @keyframes bounce {
+            0%, 100% {
+                transform: translate(-50%, -150px);
+            }
+            50% {
+                transform: translate(-50%, -130px);
             }
         }
-    }
 
-    draw() {
-        ctx.save();
-        ctx.globalAlpha=this.alpha;
-        const scale=1+(this.depth*0.002);
-        const adjustedSize=this.size*scale;
-        const r=parseInt(this.color.slice(1,3),16);
-        const g=parseInt(this.color.slice(3,5),16);
-        const b=parseInt(this.color.slice(5,7),16);
-        const bright=0.6+(this.brightness*0.4);
-        ctx.fillStyle=`rgb(${r*bright},${g*bright},${b*bright})`;
-        ctx.shadowBlur=10;
-        ctx.shadowColor=this.color;
-        ctx.beginPath();
-        ctx.arc(this.x,this.y,adjustedSize,0,Math.PI*2);
-        ctx.fill();
-        ctx.restore();
-    }
-}
-
-function createHeart(centerX,centerY,size) {
-    const points=[];
-    for(let t=0;t<Math.PI*2;t+=0.03) {
-        const x=size*16*Math.pow(Math.sin(t),3);
-        const y=-size*(13*Math.cos(t)-5*Math.cos(2*t)-2*Math.cos(3*t)-Math.cos(4*t));
-        const depth=Math.sin(t)*size*2;
-        const bright=Math.abs(Math.sin(t));
-        points.push({x:centerX+x,y:centerY+y,depth:depth,brightness:bright});
-    }
-    return points;
-}
-
-function createPopper(centerX,centerY) {
-    const points=[];
-    for(let y=0;y<250;y+=2.5) {
-        const w=35+(y*0.25);
-        for(let x=-w;x<w;x+=3) {
-            const d=Math.sqrt(w*w-x*x);
-            points.push({x:centerX+x,y:centerY-100+y,depth:d});
+        .hidden {
+            display: none;
         }
-    }
-    return points;
-}
 
-startHeart.addEventListener('click',()=>{
-    startHeart.classList.add('hidden');
-    instructionText.classList.add('hidden');
-    arrow.classList.add('hidden');
-    stage=1;
-    startAnimation();
-});
-
-function startAnimation() {
-    const cx=canvas.width/2;
-    const cy=canvas.height/2;
-
-    for(let i=0;i<550;i++) {
-        const a=Math.random()*Math.PI*2;
-        const dist=750+Math.random()*200;
-        const x=cx+Math.cos(a)*dist;
-        const y=cy+Math.sin(a)*dist;
-        particles.push(new Particle(x,y,x,y));
-    }
-
-    const heart=createHeart(cx,cy,heartSize);
-    particles.forEach((p,i)=>{
-        const pt=heart[i%heart.length];
-        p.targetX=pt.x; p.targetY=pt.y;
-        p.depth=pt.depth;
-        p.brightness=pt.brightness;
-    });
-
-    animate();
-}
-
-function animate() {
-    ctx.fillStyle='rgba(0,0,0,0.12)';
-    ctx.fillRect(0,0,canvas.width,canvas.height);
-
-    particles.forEach(p=>{p.update(); p.draw();});
-    const allArrived=particles.every(p=>p.arrived);
-
-    if(stage===1 && allArrived) {
-        stage=2;
-        growHeart();
-    }
-
-    if(stage===2 && allArrived && growthWaves>=4) {
-        stage=3;
-        setTimeout(()=>{
-            message.textContent='З Днем Народження Наталія';
-            message.style.opacity='1';
-            message.style.transition='opacity 1s';
-            setTimeout(()=>{
-                message.style.opacity='0';
-                setTimeout(()=>{
-                    stage=4;
-                    formPopper();
-                },1000);
-            },4500);
-        },600);
-    }
-
-    if(stage===4 && allArrived) {
-        stage=5;
-        setTimeout(()=>{explodePopper();},900);
-    }
-
-    requestAnimationFrame(animate);
-}
-
-function growHeart() {
-    const cx=canvas.width/2;
-    const cy=canvas.height/2;
-    const add=()=>{
-        growthWaves++;
-        heartSize+=2;
-        for(let i=0;i<170;i++) {
-            const a=Math.random()*Math.PI*2;
-            const dist=550+Math.random()*280;
-            const x=cx+Math.cos(a)*dist;
-            const y=cy+Math.sin(a)*dist;
-            particles.push(new Particle(x,y,x,y));
+        #message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 22px;
+            text-align: center;
+            opacity: 0;
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+            pointer-events: none;
+            z-index: 5;
+            max-width: 85%;
+            font-weight: bold;
+            line-height: 1.4;
+            padding: 15px;
         }
-        const heart=createHeart(cx,cy,Math.min(heartSize,maxHeartSize));
-        particles.forEach((p,i)=>{
-            p.arrived=false;
-            const pt=heart[i%heart.length];
-            p.targetX=pt.x; p.targetY=pt.y;
-            p.depth=pt.depth; p.brightness=pt.brightness;
+
+        #finalMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 20px;
+            text-align: center;
+            opacity: 0;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+            pointer-events: none;
+            z-index: 5;
+            max-width: 85%;
+            line-height: 1.5;
+            padding: 15px;
+            white-space: nowrap;
+        }
+
+        #congratsMessage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            font-size: 60px;
+            text-align: center;
+            opacity: 0;
+            text-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5);
+            pointer-events: none;
+            z-index: 5;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        @media (max-width: 768px) {
+            #message {
+                font-size: 18px;
+            }
+
+            #finalMessage {
+                font-size: 16px;
+                white-space: normal;
+            }
+
+            #congratsMessage {
+                font-size: 40px;
+            }
+
+            #instructionText {
+                font-size: 18px;
+            }
+
+            #startHeart {
+                width: 80px;
+                height: 80px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            #message {
+                font-size: 16px;
+            }
+
+            #finalMessage {
+                font-size: 14px;
+            }
+
+            #congratsMessage {
+                font-size: 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <svg id="startHeart" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M50,90 C50,90 10,60 10,35 C10,20 20,10 30,10 C40,10 45,15 50,25 C55,15 60,10 70,10 C80,10 90,20 90,35 C90,60 50,90 50,90 Z"/>
+    </svg>
+    <div id="instructionText">Натисни на нього</div>
+    <div id="arrow">↓</div>
+
+    <canvas id="canvas"></canvas>
+    <div id="message"></div>
+    <div id="finalMessage"></div>
+    <div id="congratsMessage"></div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const startHeart = document.getElementById('startHeart');
+        const message = document.getElementById('message');
+        const finalMessage = document.getElementById('finalMessage');
+        const congratsMessage = document.getElementById('congratsMessage');
+        const instructionText = document.getElementById('instructionText');
+        const arrow = document.getElementById('arrow');
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        let particles = [];
+        let stage = 0;
+        let heartSize = 2;
+        let growthWaves = 0;
+        const maxHeartSize = 15;
+
+        class Particle {
+            constructor(x, y, targetX, targetY, color = '#ff1744', depth = 0, brightness = 1) {
+                this.x = x;
+                this.y = y;
+                this.targetX = targetX;
+                this.targetY = targetY;
+                this.color = color;
+                this.size = Math.random() * 3 + 2;
+                this.vx = 0;
+                this.vy = 0;
+                this.arrived = false;
+                this.alpha = 1;
+                this.depth = depth || 0;
+                this.brightness = brightness || 1;
+            }
+
+            update() {
+                if (!this.arrived) {
+                    const dx = this.targetX - this.x;
+                    const dy = this.targetY - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < 2) {
+                        this.arrived = true;
+                        this.x = this.targetX;
+                        this.y = this.targetY;
+                    } else {
+                        this.vx = dx * 0.05;
+                        this.vy = dy * 0.05;
+                        this.x += this.vx;
+                        this.y += this.vy;
+                    }
+                }
+            }
+
+            draw() {
+                ctx.save();
+                ctx.globalAlpha = this.alpha;
+
+                const scale = 1 + (this.depth * 0.002);
+                const adjustedSize = this.size * scale;
+
+                const r = parseInt(this.color.slice(1, 3), 16);
+                const g = parseInt(this.color.slice(3, 5), 16);
+                const b = parseInt(this.color.slice(5, 7), 16);
+                const brightnessFactor = 0.6 + (this.brightness * 0.4);
+
+                ctx.fillStyle = `rgb(${r * brightnessFactor}, ${g * brightnessFactor}, ${b * brightnessFactor})`;
+                ctx.shadowBlur = 10;
+                ctx.shadowColor = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, adjustedSize, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        function createHeartShape(centerX, centerY, size) {
+            const points = [];
+            for (let t = 0; t < Math.PI * 2; t += 0.03) {
+                const x = size * 16 * Math.pow(Math.sin(t), 3);
+                const y = -size * (13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                const depth = Math.sin(t) * size * 2;
+                const brightness = Math.abs(Math.sin(t));
+
+                points.push({
+                    x: centerX + x,
+                    y: centerY + y,
+                    depth: depth,
+                    brightness: brightness
+                });
+            }
+            return points;
+        }
+
+        function createPopperShape(centerX, centerY) {
+            const points = [];
+            for (let y = 0; y < 250; y += 2.5) {
+                const width = 35 + (y * 0.25);
+                for (let x = -width; x < width; x += 3) {
+                    const depth = Math.sqrt(width * width - x * x);
+                    points.push({
+                        x: centerX + x,
+                        y: centerY - 100 + y,
+                        depth: depth
+                    });
+                }
+            }
+            for (let y = -130; y < -100; y += 2.5) {
+                for (let x = -55; x < 55; x += 3) {
+                    const depth = 55 - Math.abs(x);
+                    points.push({
+                        x: centerX + x,
+                        y: centerY + y,
+                        depth: depth
+                    });
+                }
+            }
+            for (let y = -150; y < -130; y += 3) {
+                for (let x = -15; x < 15; x += 4) {
+                    points.push({
+                        x: centerX + x,
+                        y: centerY + y,
+                        depth: 15 - Math.abs(x)
+                    });
+                }
+            }
+            return points;
+        }
+
+        startHeart.addEventListener('click', () => {
+            startHeart.classList.add('hidden');
+            instructionText.classList.add('hidden');
+            arrow.classList.add('hidden');
+            stage = 1;
+            startAnimation();
         });
-        if(growthWaves<4) setTimeout(add,1000);
-    };
-    setTimeout(add,700);
-}
 
-function formPopper() {
-    const cx=canvas.width/2;
-    const cy=canvas.height/2;
-    const points=createPopper(cx,cy);
-    const colors=['#ff6b9d','#c44569','#ffa502','#ff6348','#a29bfe','#fd79a8','#fdcb6e','#e17055'];
-    particles.forEach((p,i)=>{
-        p.arrived=false;
-        const pt=points[i%points.length];
-        p.targetX=pt.x; p.targetY=pt.y;
-        p.depth=pt.depth||0;
-        const idx=Math.floor((i/points.length)*colors.length + (pt.depth||0)*0.1)%colors.length;
-        const clr=colors[idx];
-        let step=0;
-        const total=70;
-        const t=setInterval(()=>{
-            step++;
-            p.color=clr;
-            p.brightness=0.7+((pt.depth||0)/100)*0.3;
-            if(step>=total) clearInterval(t);
-        },35);
-    });
-}
+        function startAnimation() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
 
-function explodePopper() {
-    particles.forEach(p=>{
-        const a=Math.random()*Math.PI*2;
-        const s=Math.random()*14+5;
-        p.vx=Math.cos(a)*s;
-        p.vy=Math.sin(a)*s - Math.random()*8;
-        p.arrived=true;
-    });
+            for (let i = 0; i < 600; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const distance = 800 + Math.random() * 200;
+                const x = centerX + Math.cos(angle) * distance;
+                const y = centerY + Math.sin(angle) * distance;
+                particles.push(new Particle(x, y, x, y));
+            }
 
-    let t=0;
-    const ex=setInterval(()=>{
-        t++;
-        particles.forEach(p=>{
-            p.x+=p.vx;
-            p.y+=p.vy;
-            p.vy+=0.25;
-            p.alpha-=0.012;
-        });
-        if(t>110) {
-            clearInterval(ex);
-            stage=6;
-            particles=[];
-            setTimeout(()=>{
-                finalMessage.textContent='Любимо тебе всією родиною. Дякуємо, що ти з нами';
-                finalMessage.style.opacity='1';
-                finalMessage.style.transition='opacity 1.8s';
-                setTimeout(show37,2600);
-            },700);
+            const heartPoints = createHeartShape(centerX, centerY, heartSize);
+            particles.forEach((p, i) => {
+                const point = heartPoints[i % heartPoints.length];
+                p.targetX = point.x;
+                p.targetY = point.y;
+                p.depth = point.depth;
+                p.brightness = point.brightness;
+            });
+
+            animate();
         }
-    },30);
-}
 
-function show37() {
-    finalMessage.style.transform='translate(-50%,-120%)';
-    finalMessage.style.opacity='0';
+        function animate() {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    setTimeout(()=>{
-        last37.style.opacity='1';
-        last37.style.transform='translate(-50%, -20px)';
-    },300);
-}
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
 
-window.addEventListener('resize',()=>{
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-});
-</script>
+            const allArrived = particles.every(p => p.arrived);
 
+            if (stage === 1 && allArrived) {
+                stage = 2;
+                growHeart();
+            }
+
+            if (stage === 2 && allArrived && growthWaves >= 5) {
+                stage = 3;
+                setTimeout(() => {
+                    message.textContent = 'З Днем Народження Наталія';
+                    message.style.opacity = '1';
+                    message.style.transition = 'opacity 1s';
+
+                    setTimeout(() => {
+                        message.style.opacity = '0';
+                        setTimeout(() => {
+                            stage = 4;
+                            formPopper();
+                        }, 1000);
+                    }, 6000);
+                }, 500);
+            }
+
+            if (stage === 4 && allArrived) {
+                stage = 5;
+                setTimeout(() => {
+                    explodePopper();
+                }, 1000);
+            }
+
+            requestAnimationFrame(animate);
+        }
+
+        function growHeart() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+
+            const addWave = () => {
+                growthWaves++;
+                heartSize += 2.5;
+
+                const newParticles = 200;
+                for (let i = 0; i < newParticles; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 600 + Math.random() * 300;
+                    const x = centerX + Math.cos(angle) * distance;
+                    const y = centerY + Math.sin(angle) * distance;
+                    particles.push(new Particle(x, y, x, y));
+                }
+
+                const heartPoints = createHeartShape(centerX, centerY, Math.min(heartSize, maxHeartSize));
+                particles.forEach((p, i) => {
+                    p.arrived = false;
+                    const point = heartPoints[i % heartPoints.length];
+                    p.targetX = point.x;
+                    p.targetY = point.y;
+                    p.depth = point.depth;
+                    p.brightness = point.brightness;
+                });
+
+                if (growthWaves < 5) {
+                    setTimeout(addWave, 1200);
+                }
+            };
+
+            setTimeout(addWave, 800);
+        }
+
+        function formPopper() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2;
+            const popperPoints = createPopperShape(centerX, centerY);
+
+            const colors = ['#ff6b9d', '#c44569', '#ffa502', '#ff6348', '#a29bfe', '#fd79a8', '#fdcb6e', '#e17055'];
+
+            particles.forEach((p, i) => {
+                p.arrived = false;
+                const point = popperPoints[i % popperPoints.length];
+                p.targetX = point.x;
+                p.targetY = point.y;
+                p.depth = point.depth || 0;
+
+                const colorIndex = Math.floor((i / popperPoints.length) * colors.length + (point.depth || 0) * 0.1) % colors.length;
+                const targetColor = colors[colorIndex];
+                const steps = 80;
+                let currentStep = 0;
+
+                const colorTransition = setInterval(() => {
+                    currentStep++;
+                    const progress = currentStep / steps;
+                    p.color = targetColor;
+                    p.brightness = 0.7 + ((point.depth || 0) / 100) * 0.3;
+                    if (currentStep >= steps) clearInterval(colorTransition);
+                }, 40);
+            });
+        }
+
+        function explodePopper() {
+            const centerX = canvas.width / 2;
+            const centerY = canvas.height / 2 - 50;
+
+            particles.forEach(p => {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = Math.random() * 15 + 5;
+                p.vx = Math.cos(angle) * speed;
+                p.vy = Math.sin(angle) * speed - Math.random() * 10;
+                p.arrived = true;
+            });
+
+            let explosionTime = 0;
+            const explosionInterval = setInterval(() => {
+                explosionTime++;
+                particles.forEach(p => {
+                    p.x += p.vx;
+                    p.y += p.vy;
+                    p.vy += 0.3;
+                    p.alpha -= 0.01;
+                });
+
+                if (explosionTime > 120) {
+                    clearInterval(explosionInterval);
+                    stage = 6;
+                    particles = [];
+                    setTimeout(() => {
+                        finalMessage.textContent = 'Любимо тебе всією родиною, дякую, що ти з нами';
+                        finalMessage.style.opacity = '1';
+                        finalMessage.style.transition = 'opacity 2s';
+
+                        setTimeout(() => {
+                            finalMessage.style.opacity = '0';
+                            setTimeout(() => {
+                                showFinalCongrats();
+                            }, 1500);
+                        }, 5000);
+                    }, 1000);
+                }
+            }, 30);
+        }
+
+        function showFinalCongrats() {
+            stage = 7;
+
+            const digits = ['3', '6'];
+            const digit1 = document.createElement('div');
+            const digit2 = document.createElement('div');
+
+            digit1.textContent = digits[0];
+            digit2.textContent = digits[1];
+
+            Object.assign(digit1.style, {
+                position: 'absolute',
+                top: '30%',
+                left: '50%',
+                transform: 'translate(-50%, -100%)',
+                color: '#ffd700',
+                fontSize: window.innerWidth < 480 ? '80px' : '120px',
+                fontWeight: 'bold',
+                textShadow: '0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5)',
+                zIndex: '10',
+                opacity: '0',
+                transition: 'all 1s ease-out'
+            });
+
+            Object.assign(digit2.style, {
+                position: 'absolute',
+                top: '70%',
+                left: '50%',
+                transform: 'translate(-50%, 100%)',
+                color: '#ffd700',
+                fontSize: window.innerWidth < 480 ? '80px' : '120px',
+                fontWeight: 'bold',
+                textShadow: '0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5)',
+                zIndex: '10',
+                opacity: '0',
+                transition: 'all 1s ease-out'
+            });
+
+            document.body.appendChild(digit1);
+            document.body.appendChild(digit2);
+
+            setTimeout(() => {
+                digit1.style.top = '45%';
+                digit1.style.opacity = '1';
+                digit2.style.top = '55%';
+                digit2.style.opacity = '1';
+            }, 50);
+
+            setTimeout(() => {
+                digit1.style.transform = 'translate(-50%, -50%) scale(1.2)';
+                digit2.style.transform = 'translate(-50%, -50%) scale(1.2)';
+            }, 1000);
+
+            setTimeout(() => {
+                digit1.style.transition = 'all 0.8s ease-in-out';
+                digit2.style.transition = 'all 0.8s ease-in-out';
+
+                digit1.style.top = '50%';
+                digit1.style.left = '42%';
+                digit1.style.transform = 'translate(-50%, -50%) scale(1)';
+
+                digit2.style.top = '50%';
+                digit2.style.left = '58%';
+                digit2.style.transform = 'translate(-50%, -50%) scale(1)';
+            }, 2500);
+
+            setTimeout(() => {
+                digit1.style.transition = 'all 0.6s ease-in';
+                digit2.style.transition = 'all 0.6s ease-in';
+
+                digit1.textContent = '3';
+                digit2.textContent = '7';
+
+                digit1.style.fontSize = window.innerWidth < 480 ? '100px' : '150px';
+                digit2.style.fontSize = window.innerWidth < 480 ? '100px' : '150px';
+
+                digit1.style.textShadow = '0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 215, 0, 0.8)';
+                digit2.style.textShadow = '0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 215, 0, 0.8)';
+            }, 3800);
+
+            setTimeout(() => {
+                digit1.style.opacity = '0';
+                digit2.style.opacity = '0';
+
+                setTimeout(() => {
+                    digit1.remove();
+                    digit2.remove();
+
+                    congratsMessage.textContent = 'Вітаю!';
+                    congratsMessage.style.opacity = '1';
+                    congratsMessage.style.transition = 'opacity 2s ease-in';
+
+                    setTimeout(() => {
+                        congratsMessage.style.color = '#ffd700';
+                        congratsMessage.style.textShadow = '0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 215, 0, 0.8), 0 0 180px rgba(255, 215, 0, 0.4)';
+                    }, 1000);
+                }, 1000);
+            }, 5500);
+        }
+        
+      window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+    </script>
 </body>
 </html>
