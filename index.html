@@ -31,8 +31,8 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             cursor: pointer;
             transition: transform 0.3s ease;
             z-index: 10;
@@ -52,7 +52,7 @@
             left: 50%;
             transform: translate(-50%, -220px);
             color: #fff;
-            font-size: 20px;
+            font-size: 28px;
             text-align: center;
             z-index: 11;
             font-family: 'Georgia', serif;
@@ -65,7 +65,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -150px);
-            font-size: 50px;
+            font-size: 60px;
             color: #fff;
             z-index: 11;
             animation: bounce 1.5s ease-in-out infinite;
@@ -90,13 +90,13 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 22px;
+            font-size: 32px;
             text-align: center;
             opacity: 0;
             text-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
             pointer-events: none;
             z-index: 5;
-            max-width: 85%;
+            max-width: 90%;
             font-weight: bold;
             line-height: 1.4;
             padding: 15px;
@@ -108,16 +108,15 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 20px;
+            font-size: 26px;
             text-align: center;
             opacity: 0;
             text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
             pointer-events: none;
             z-index: 5;
-            max-width: 85%;
+            max-width: 90%;
             line-height: 1.5;
             padding: 15px;
-            white-space: nowrap;
         }
 
         #congratsMessage {
@@ -126,7 +125,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             color: #fff;
-            font-size: 60px;
+            font-size: 80px;
             text-align: center;
             opacity: 0;
             text-shadow: 0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5);
@@ -137,40 +136,43 @@
         }
 
         @media (max-width: 768px) {
+            #instructionText {
+                font-size: 24px;
+            }
+
             #message {
-                font-size: 18px;
+                font-size: 26px;
             }
 
             #finalMessage {
-                font-size: 16px;
-                white-space: normal;
+                font-size: 22px;
             }
 
             #congratsMessage {
-                font-size: 40px;
-            }
-
-            #instructionText {
-                font-size: 18px;
+                font-size: 60px;
             }
 
             #startHeart {
-                width: 80px;
-                height: 80px;
+                width: 100px;
+                height: 100px;
             }
         }
 
         @media (max-width: 480px) {
+            #instructionText {
+                font-size: 22px;
+            }
+
             #message {
-                font-size: 16px;
+                font-size: 24px;
             }
 
             #finalMessage {
-                font-size: 14px;
+                font-size: 20px;
             }
 
             #congratsMessage {
-                font-size: 32px;
+                font-size: 50px;
             }
         }
     </style>
@@ -508,13 +510,17 @@
             digit1.textContent = digits[0];
             digit2.textContent = digits[1];
 
+            const isMobile = window.innerWidth < 768;
+            const fontSize = isMobile ? '100px' : '140px';
+            const largeFontSize = isMobile ? '120px' : '170px';
+
             Object.assign(digit1.style, {
                 position: 'absolute',
                 top: '30%',
                 left: '50%',
                 transform: 'translate(-50%, -100%)',
                 color: '#ffd700',
-                fontSize: window.innerWidth < 480 ? '80px' : '120px',
+                fontSize: fontSize,
                 fontWeight: 'bold',
                 textShadow: '0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5)',
                 zIndex: '10',
@@ -528,7 +534,7 @@
                 left: '50%',
                 transform: 'translate(-50%, 100%)',
                 color: '#ffd700',
-                fontSize: window.innerWidth < 480 ? '80px' : '120px',
+                fontSize: fontSize,
                 fontWeight: 'bold',
                 textShadow: '0 0 40px rgba(255, 215, 0, 1), 0 0 80px rgba(255, 215, 0, 0.5)',
                 zIndex: '10',
@@ -571,8 +577,8 @@
                 digit1.textContent = '3';
                 digit2.textContent = '7';
 
-                digit1.style.fontSize = window.innerWidth < 480 ? '100px' : '150px';
-                digit2.style.fontSize = window.innerWidth < 480 ? '100px' : '150px';
+                digit1.style.fontSize = largeFontSize;
+                digit2.style.fontSize = largeFontSize;
 
                 digit1.style.textShadow = '0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 215, 0, 0.8)';
                 digit2.style.textShadow = '0 0 60px rgba(255, 215, 0, 1), 0 0 120px rgba(255, 215, 0, 0.8)';
@@ -597,8 +603,8 @@
                 }, 1000);
             }, 5500);
         }
-        
-      window.addEventListener('resize', () => {
+
+        window.addEventListener('resize', () => {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
         });
